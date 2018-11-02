@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+mono sim.exe \
+-N 8 \
+-output ./pfa.dat \
+-mem2.channel_max 1 \
+-mem2.rank_max 1 \
+-mem.channel_max 1 \
+-mem.rank_max 1 \
+-mem2.map_type ROW_COL_RANK_BANK_CHAN \
+-mem.map_type ROW_COL_RANK_BANK_CHAN \
+-sched.is_omniscient true \
+-proc.wb true \
+-proc.cache true \
+-proc.cache_replacement_policy DRAMTrueLRU \
+-proc.cache_insertion_policy PFA \
+-proc.cache_write_policy WriteBack \
+-sched.sched_algo FRFCFS \
+-mctrl.page_randomize true \
+-sim_type INST \
+-sim_inst_max 500000000 \
+-warmup_inst_max 500 \
+-TraceDirs ./FilteredTrace \
+-traces majid.gz majid.gz majid.gz majid.gz majid.gz majid.gz majid.gz majid.gz

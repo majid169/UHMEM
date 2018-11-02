@@ -57,9 +57,9 @@ namespace MemMap
                 return true;
   //              return insert(req);
             }
-            else if ((ins == "RBLA") || (ins == "RBLAMLP") || (ins == "PFA")) {
-		return false;
-	    }	
+            else if ((ins == "RBLA") || (ins == "RBLAMLP") || (ins == "PFA") || (ins == "AC")) {
+		        return false;
+	        }	
             else if (ins == "ACTS"/* && Sim.is_critical_thread(req.pid)*/) {
                 return insert(req);
             }

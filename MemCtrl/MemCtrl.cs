@@ -227,6 +227,21 @@ namespace MemMap {
                 }
             }
 
+            // AC policy
+            if ((Config.proc.cache_insertion_policy == "AC") && (cycles % (6*Config.mem.clock_factor) == 0))
+            {
+                int indexi, indexj;
+                for (indexi = 0; indexi < rmax; indexi++)
+                {
+                    for (indexj = 0; indexj < bmax; indexj++)
+                    {
+                         Measurement.read_MLP_cal (ref readqs[indexi, indexj]); 
+                         Measurement.write_MLP_cal (ref writeqs[indexi, indexj]);
+                         Measurement.MLP_cal (ref inflightqs[indexi, indexj]);
+                    }
+                }
+            }
+
             /*** serve completed request ***/
             if (bus_q.Count > 0 && bus_q[0].ts <= cycles) {
                 MemAddr addr = bus_q[0].addr;
@@ -241,6 +256,9 @@ namespace MemMap {
                 if (Config.proc.cache_insertion_policy == "PFA")
                   Measurement.NVMBankPidDeUpdate(req);
                
+                if (Config.proc.cache_insertion_policy == "AC")
+                  Measurement.NVMBankPidDeUpdate(req);
+
                 dequeue_req(req);
             }
 
@@ -252,6 +270,10 @@ namespace MemMap {
           
                 if (Config.proc.cache_insertion_policy == "PFA")
                     CheckBusConflict();
+
+                if (Config.proc.cache_insertion_policy == "AC")
+                    CheckBusConflict();
+
                 return;
             }
 
@@ -284,14 +306,23 @@ namespace MemMap {
                      RowStat.UpdateDict(RowStat.NVMDict,best_req,this);
 //                     Measurement.NVMBankPidEnUpdate(best_req);
                   }
+                  else if (Config.proc.cache_insertion_policy == "AC") 
+                  {
+                     RowStat.UpdateDict(RowStat.NVMDict,best_req,this);
+//                     Measurement.NVMBankPidEnUpdate(best_req);
+                  }
                }
                if (Config.proc.cache_insertion_policy == "PFA")
+                   Measurement.NVMBankPidEnUpdate(best_req);              
+               if (Config.proc.cache_insertion_policy == "AC")
                    Measurement.NVMBankPidEnUpdate(best_req);              
                issue_req(best_req);
             }
             else issue_cmd(best_cmd);
            
             if (Config.proc.cache_insertion_policy == "PFA")
+                CheckBusConflict();                          
+            if (Config.proc.cache_insertion_policy == "AC")
                 CheckBusConflict();                          
         }
 
@@ -433,6 +464,8 @@ namespace MemMap {
 
                         if (Config.proc.cache_insertion_policy == "PFA")
                              Measurement.NVMResetRowBufferChange (req);
+                        if (Config.proc.cache_insertion_policy == "AC")
+                             Measurement.NVMResetRowBufferChange (req);
                         
                         List<Req> q = get_q(req);
                //         Dbg.Assert(q.Count <= q.Capacity);
@@ -442,6 +475,8 @@ namespace MemMap {
                         cmdq.RemoveRange(0, 2);
 
                         if (Config.proc.cache_insertion_policy == "PFA")
+                            Measurement.NVM_bus_conflict_reset(req.pid); 
+                        if (Config.proc.cache_insertion_policy == "AC")
                             Measurement.NVM_bus_conflict_reset(req.pid); 
                     }
                 }
@@ -500,6 +535,8 @@ namespace MemMap {
 
                     if (Config.proc.cache_insertion_policy == "PFA")
                          Measurement.NVMResetRowBufferChange (req);
+                    if (Config.proc.cache_insertion_policy == "AC")
+                         Measurement.NVMResetRowBufferChange (req);
                
                     List<Req> q = get_q(req);
              //       Dbg.Assert(q.Count <= q.Capacity);
@@ -510,6 +547,8 @@ namespace MemMap {
                     cmdq.RemoveRange(0, 2);
 
                     if (Config.proc.cache_insertion_policy == "PFA")
+                        Measurement.NVM_bus_conflict_reset(req.pid);
+                    if (Config.proc.cache_insertion_policy == "AC")
                         Measurement.NVM_bus_conflict_reset(req.pid);
                 }
             }
@@ -692,6 +731,15 @@ namespace MemMap {
                     Row_Migration_Policies.target = true;
                     Row_Migration_Policies.target_req = req;                 
                 }  
+                else if (Config.proc.cache_insertion_policy == "AC")
+                {   
+                    RowStat.UpdateMLP(RowStat.NVMDict,req); 
+                    Measurement.mem_num_dec (req);
+//                    Measurement.NVMServiceTimeUpdate (req);
+//                    Measurement.NVMCoreReqNumDec (req);
+                    Row_Migration_Policies.target = true;
+                    Row_Migration_Policies.target_req = req;                 
+                } 
                 else if (Config.proc.cache_insertion_policy == "RBLA")
                 {
                     Row_Migration_Policies.target = true;
@@ -699,6 +747,8 @@ namespace MemMap {
                 }
             }
             if (Config.proc.cache_insertion_policy == "PFA")
+                Measurement.NVMCoreReqNumDec (req);
+            if (Config.proc.cache_insertion_policy == "AC")
                 Measurement.NVMCoreReqNumDec (req);
             
 /*            if (Config.proc.cache_insertion_policy == "PFA")
@@ -857,6 +907,10 @@ namespace MemMap {
                  { 
                      Measurement.mem_num_inc (req);
                  }   
+                 if (Config.proc.cache_insertion_policy == "AC")
+                 { 
+                     Measurement.mem_num_inc (req);
+                 }   
 
                  Sim.caches[Sim.get_cache(req.pid)].promote(req);
                 //stats
@@ -891,7 +945,13 @@ namespace MemMap {
                 {
                     Measurement.mem_num_inc (req);
                 }  
+                if ((!req.migrated_request) && (Config.proc.cache_insertion_policy == "AC"))
+                {
+                    Measurement.mem_num_inc (req);
+                }  
                 if (Config.proc.cache_insertion_policy == "PFA")
+                    Measurement.NVMCoreReqNumInc(req); 
+                if (Config.proc.cache_insertion_policy == "AC")
                     Measurement.NVMCoreReqNumInc(req); 
                 q.Add(req);
                 if (req.type == ReqType.WR) {
@@ -1024,6 +1084,11 @@ namespace MemMap {
 //                   if ((!req.migrated_request) && (req.type == ReqType.RD))
                        Measurement.NVMMissSetRowBufferChange (req);
                 }
+                if (Config.proc.cache_insertion_policy == "AC")
+                {
+//                   if ((!req.migrated_request) && (req.type == ReqType.RD))
+                       Measurement.NVMMissSetRowBufferChange (req);
+                }
             }
             else {
                 //bank stat
@@ -1051,6 +1116,8 @@ namespace MemMap {
 
                 if (Config.proc.cache_insertion_policy == "PFA")
                     Measurement.NVMHitSetRowBufferChange (req);
+                if (Config.proc.cache_insertion_policy == "AC")
+                    Measurement.NVMHitSetRowBufferChange (req);
             }
 
     //        if (req.type == ReqType.RD && (!req.migrated_request) )
@@ -1058,6 +1125,8 @@ namespace MemMap {
             //issue command
 
             if (Config.proc.cache_insertion_policy == "PFA")
+               Measurement.NVMSetCorePrevRowid (req);
+            if (Config.proc.cache_insertion_policy == "AC")
                Measurement.NVMSetCorePrevRowid (req);
 
             issue_cmd(cmd);
@@ -1121,6 +1190,8 @@ namespace MemMap {
            
                     if (Config.proc.cache_insertion_policy == "PFA")
                         Measurement.NVM_bus_conflict_reset(cmd.req.pid);
+                    if (Config.proc.cache_insertion_policy == "AC")
+                        Measurement.NVM_bus_conflict_reset(cmd.req.pid);
                     /*dbg = String.Format("@{0,6} DRAM READ: Channel {1}, Rank {2}, Bank {3}, Row {4}, Col {5}",
                         cycles, cid, addr.rid, addr.bid, addr.rowid, addr.colid);*/
 
@@ -1140,6 +1211,8 @@ namespace MemMap {
                     write(addr);
 
                     if (Config.proc.cache_insertion_policy == "PFA")
+                        Measurement.NVM_bus_conflict_reset(cmd.req.pid);
+                    if (Config.proc.cache_insertion_policy == "AC")
                         Measurement.NVM_bus_conflict_reset(cmd.req.pid);
                     /*dbg = String.Format("@{0,6} DRAM WRTE: Channel {1}, Rank {2}, Bank {3}, Row {4}, Col {5}",
                         cycles, cid, addr.rid, addr.bid, addr.rowid, addr.colid);*/

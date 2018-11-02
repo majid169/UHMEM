@@ -7,10 +7,10 @@ using System.Reflection;
 
 namespace MemMap
 {
-        public class RowCache
-        {
+    public class RowCache
+    {
 		public class RCache
-                {
+        {
 			private List<ulong>[] keys;
 			private List<int>[] values;
 		
@@ -68,14 +68,14 @@ namespace MemMap
 		//			Console.WriteLine("index is -1");
 					return;
 				}	
-			
-                                keys[setNum].RemoveAt(index);
-                                values[setNum].RemoveAt(index);
-                                        
-                                if (RowStat.NVMDict.ContainsKey(key))
-                                	RowStat.NVMDict.Remove(key);
-                                if (RowStat.NVMLookUp.Contains(key))
-                                	RowStat.NVMLookUp.Remove(key);
+
+                keys[setNum].RemoveAt(index);
+                values[setNum].RemoveAt(index);
+                        
+                if (RowStat.NVMDict.ContainsKey(key))
+                    RowStat.NVMDict.Remove(key);
+                if (RowStat.NVMLookUp.Contains(key))
+                    RowStat.NVMLookUp.Remove(key);
 			}
 
 			public void clear()

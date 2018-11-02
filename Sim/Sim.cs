@@ -391,12 +391,16 @@ namespace MemMap
 	
                 if (Config.proc.cache_insertion_policy == "PFA")
                      mesur.tick();  
+                if (Config.proc.cache_insertion_policy == "AC")
+                     mesur.tick();  
 
 	
 		//Jin: Row Migration Policies
 		if (Config.proc.cache_insertion_policy == "RBLA" || Config.proc.cache_insertion_policy == "PFA")
        	             rmp.tick();
 
+		if (Config.proc.cache_insertion_policy == "AC")
+       	             rmp.tick();
  
                 //progress simulation time
                 cycles++;
