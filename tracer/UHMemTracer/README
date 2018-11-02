@@ -1,9 +1,2 @@
-allcache - shows all the capabilities of the cache simulator
-           
-dcache - shows all the capabilities of the cache simulator
-         NB: for performance reasons we do not model the icache
-
-dcache_xscale_config - models the cache hierarchy of and ipaq 55xx PDA
-                       cache size, associativity, etc. can be changed via commanline line switches
-                       NB: for performance reasons we do not model the icache
-
+This is a naive tracer for UHMEM. 
+It uses a simple direct cache to filter out all accesses getting hit on chip, and collects the traces on miss. 
