@@ -286,13 +286,13 @@ namespace MemMap
 			
 			foreach (ulong rowkey in DramLookUp)
             {
-                    temp = RowStat.DramDict[rowkey];
-                    DramReadMissPerInterval += temp.ReadMiss;
-                    DramWriteMissPerInterval += temp.WriteMiss;
-                    DramReadHitPerInterval += temp.ReadHit;
-                    DramWeightedReadMissPerInterval += (double)temp.ReadMiss * temp.ReadMLPnum;
-                    DramWeightedWriteMissPerInterval += (double)temp.WriteMiss * temp.WriteMLPnum;
-                    DramWeightedReadResponseTime += (double) (temp.ReadMiss * Dram_Q_rd_miss_init + temp.ReadHit * Dram_Q_rd_hit_init) * temp.ReadMLPnum;
+                temp = RowStat.DramDict[rowkey];
+                DramReadMissPerInterval += temp.ReadMiss;
+                DramWriteMissPerInterval += temp.WriteMiss;
+                DramReadHitPerInterval += temp.ReadHit;
+                DramWeightedReadMissPerInterval += (double)temp.ReadMiss * temp.ReadMLPnum;
+                DramWeightedWriteMissPerInterval += (double)temp.WriteMiss * temp.WriteMLPnum;
+                DramWeightedReadResponseTime += (double) (temp.ReadMiss * Dram_Q_rd_miss_init + temp.ReadHit * Dram_Q_rd_hit_init) * temp.ReadMLPnum;
             }
 					
 		}                
@@ -303,8 +303,6 @@ namespace MemMap
                DramDict.Clear();
                NVMLookUp.Clear();
                DramLookUp.Clear();
-//                  Array.Clear(app_util_Dram, 0 , 99);
-//	               Array.Clear(app_util_NVM, 0 , 99);
                RowCache.NVMCache.clear();
         }
                     

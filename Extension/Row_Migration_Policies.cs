@@ -27,6 +27,8 @@ namespace MemMap
 			       PFA.initialize();
 			   else if (Config.proc.cache_insertion_policy == "AC")
 			       AC.initialize();
+               else if (Config.proc.cache_insertion_policy == "Ideal")
+                   Ideal.initialize();
             }
             else
             {
@@ -42,6 +44,8 @@ namespace MemMap
 			            PFA.tick();
 			        else if (Config.proc.cache_insertion_policy == "AC" && Cycles >= Interval)
 			            AC.tick();
+                    else if (Config.proc.cache_insertion_policy == "Ideal" && Cycles >= Interval)
+                        Ideal.tick();
                 }
 
                 if (Cycles % Interval ==0)
@@ -71,6 +75,8 @@ namespace MemMap
                 case "AC":
                     AC.decision();
                     break;
+                case "Ideal":
+                    Ideal.decision();
                 default:
                     Console.WriteLine("Row Migration Policy Error");
                     break;
