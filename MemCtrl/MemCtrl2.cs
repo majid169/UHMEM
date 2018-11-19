@@ -215,6 +215,20 @@ namespace MemMap {
                 }
             }
 
+            if ((Config.proc.cache_insertion_policy == "Ideal") && (cycles % (6*Config.mem.clock_factor) == 0))
+            {
+                int indexi, indexj;
+                for (indexi = 0; indexi < rmax; indexi++)
+                {
+                    for (indexj = 0; indexj < bmax; indexj++)
+                    {
+                         Measurement.read_MLP_cal (ref readqs[indexi, indexj]); 
+                         Measurement.write_MLP_cal (ref writeqs[indexi, indexj]);
+                         Measurement.MLP_cal (ref inflightqs[indexi, indexj]);
+                    }
+                }
+            }
+
             /*** serve completed request ***/
             if (bus_q.Count > 0 && bus_q[0].ts <= cycles) {
                 MemAddr addr = bus_q[0].addr;
@@ -233,6 +247,8 @@ namespace MemMap {
                    Measurement.DramBankPidDeUpdate(req);
                 if (Config.proc.cache_insertion_policy == "AC")
                    Measurement.DramBankPidDeUpdate(req);
+                if (Config.proc.cache_insertion_policy == "Ideal")
+                   Measurement.DramBankPidDeUpdate(req);
                     
                 dequeue_req(req);
  
@@ -246,6 +262,8 @@ namespace MemMap {
                 if (Config.proc.cache_insertion_policy == "PFA")
                     CheckBusConflict();
                 if (Config.proc.cache_insertion_policy == "AC")
+                    CheckBusConflict();
+                if (Config.proc.cache_insertion_policy == "Ideal")
                     CheckBusConflict();
                 return;
             }
@@ -284,6 +302,11 @@ namespace MemMap {
                        RowStat.UpdateDict(RowStat.DramDict, best_req, this);
 //                       Measurement.DramBankPidEnUpdate(best_req); 
                     }
+                    else if (Config.proc.cache_insertion_policy == "Ideal")
+                    {
+                       RowStat.UpdateDict(RowStat.DramDict, best_req, this);
+//                       Measurement.DramBankPidEnUpdate(best_req); 
+                    }
 //                    if (Config.proc.cache_insertion_policy == "PFA")
 //                        Measurement.DramBankPidEnUpdate(best_req); 
                 }
@@ -291,6 +314,8 @@ namespace MemMap {
                 if (Config.proc.cache_insertion_policy == "PFA")
                     Measurement.DramBankPidEnUpdate(best_req);
                 if (Config.proc.cache_insertion_policy == "AC")
+                    Measurement.DramBankPidEnUpdate(best_req);
+                if (Config.proc.cache_insertion_policy == "Ideal")
                     Measurement.DramBankPidEnUpdate(best_req);
 
                  issue_req(best_req);
@@ -301,6 +326,8 @@ namespace MemMap {
             if (Config.proc.cache_insertion_policy == "PFA")
                 CheckBusConflict();
             if (Config.proc.cache_insertion_policy == "AC")
+                CheckBusConflict();
+            if (Config.proc.cache_insertion_policy == "Ideal")
                 CheckBusConflict();
         }
  
@@ -443,7 +470,8 @@ namespace MemMap {
                              Measurement.DramResetRowBufferChange (req);
                         if (Config.proc.cache_insertion_policy == "AC")
                              Measurement.DramResetRowBufferChange (req);
-                   
+                        if (Config.proc.cache_insertion_policy == "Ideal")
+                             Measurement.DramResetRowBufferChange (req);
 
                         List<Req> q = get_q(req);
 
@@ -456,6 +484,8 @@ namespace MemMap {
                         if (Config.proc.cache_insertion_policy == "PFA")
                             Measurement.Dram_bus_conflict_reset(req.pid);
                         if (Config.proc.cache_insertion_policy == "AC")
+                            Measurement.Dram_bus_conflict_reset(req.pid);
+                        if (Config.proc.cache_insertion_policy == "Ideal")
                             Measurement.Dram_bus_conflict_reset(req.pid);
                     }
                 }
@@ -516,6 +546,8 @@ namespace MemMap {
                         Measurement.DramResetRowBufferChange (req);
                     if (Config.proc.cache_insertion_policy == "AC")
                         Measurement.DramResetRowBufferChange (req);
+                    if (Config.proc.cache_insertion_policy == "Ideal")
+                        Measurement.DramResetRowBufferChange (req);
                   
                     List<Req> q = get_q(req);
 
@@ -528,6 +560,8 @@ namespace MemMap {
                     if (Config.proc.cache_insertion_policy == "PFA")
                         Measurement.Dram_bus_conflict_reset(req.pid);
                     if (Config.proc.cache_insertion_policy == "AC")
+                        Measurement.Dram_bus_conflict_reset(req.pid);
+                    if (Config.proc.cache_insertion_policy == "Ideal")
                         Measurement.Dram_bus_conflict_reset(req.pid);
                 }
             }
@@ -713,9 +747,19 @@ namespace MemMap {
 //                   Measurement.DramCoreReqNumDec (req);
             }
 
+            if ((!req.migrated_request) && (Config.proc.cache_insertion_policy == "Ideal"))
+            {
+                   RowStat.UpdateMLP (RowStat.DramDict, req);
+               	   Measurement.mem_num_dec (req);
+//                   Measurement.DramServiceTimeUpdate (req);
+//                   Measurement.DramCoreReqNumDec (req);
+            }
+
             if (Config.proc.cache_insertion_policy == "PFA")
                 Measurement.DramCoreReqNumDec (req);
             if (Config.proc.cache_insertion_policy == "AC")
+                Measurement.DramCoreReqNumDec (req);
+            if (Config.proc.cache_insertion_policy == "Ideal")
                 Measurement.DramCoreReqNumDec (req);
             
  /*            if (Config.proc.cache_insertion_policy == "RBLAMLP" || Config.proc.cache_insertion_policy == "PFA")
@@ -825,6 +869,11 @@ namespace MemMap {
                	        Measurement.mem_num_dec (req);;
 //                        Measurement.DramCoreReqNumDec (req);
                      }  
+	                if ((!req.migrated_request) && (Config.proc.cache_insertion_policy == "Ideal"))
+                    {    
+               	        Measurement.mem_num_dec (req);;
+//                        Measurement.DramCoreReqNumDec (req);
+                    }  
                     return;
                 }
             }
@@ -856,6 +905,8 @@ namespace MemMap {
             if (Config.proc.cache_insertion_policy == "PFA")
                 Measurement.DramCoreReqNumInc (req);          
             if (Config.proc.cache_insertion_policy == "AC")
+                Measurement.DramCoreReqNumInc (req);          
+            if (Config.proc.cache_insertion_policy == "Ideal")
                 Measurement.DramCoreReqNumInc (req);          
 
             // check if cache hit
@@ -1026,6 +1077,12 @@ namespace MemMap {
 //              	    if ((!req.migrated_request) && (req.type == ReqType.RD))
                         Measurement.DramMissSetRowBufferChange (req);
                 }
+
+                if (Config.proc.cache_insertion_policy == "Ideal")
+                {
+//              	    if ((!req.migrated_request) && (req.type == ReqType.RD))
+                        Measurement.DramMissSetRowBufferChange (req);
+                }
                
             }
             else {
@@ -1054,11 +1111,15 @@ namespace MemMap {
                     Measurement.DramHitSetRowBufferChange (req);
                 if (Config.proc.cache_insertion_policy == "AC")
                     Measurement.DramHitSetRowBufferChange (req);
+                if (Config.proc.cache_insertion_policy == "Ideal")
+                    Measurement.DramHitSetRowBufferChange (req);
             }
  
            if (Config.proc.cache_insertion_policy == "PFA")
                    Measurement.DramSetCorePrevRowid (req);
            if (Config.proc.cache_insertion_policy == "AC")
+                   Measurement.DramSetCorePrevRowid (req);
+           if (Config.proc.cache_insertion_policy == "Ideal")
                    Measurement.DramSetCorePrevRowid (req);
 
             //issue command
@@ -1128,6 +1189,9 @@ namespace MemMap {
                         Measurement.Dram_bus_conflict_reset(cmd.req.pid);
                     if (Config.proc.cache_insertion_policy == "AC")
                         Measurement.Dram_bus_conflict_reset(cmd.req.pid);
+
+                    if (Config.proc.cache_insertion_policy == "Ideal")
+                        Measurement.Dram_bus_conflict_reset(cmd.req.pid);
                     /*dbg = String.Format("@{0,6} DRAM READ: Channel {1}, Rank {2}, Bank {3}, Row {4}, Col {5}",
                         cycles, cid, addr.rid, addr.bid, addr.rowid, addr.colid);*/
 
@@ -1148,6 +1212,9 @@ namespace MemMap {
                     if (Config.proc.cache_insertion_policy == "PFA")
                         Measurement.Dram_bus_conflict_reset(cmd.req.pid);
                     if (Config.proc.cache_insertion_policy == "AC")
+                        Measurement.Dram_bus_conflict_reset(cmd.req.pid);
+
+                    if (Config.proc.cache_insertion_policy == "Ideal")
                         Measurement.Dram_bus_conflict_reset(cmd.req.pid);
                     /*dbg = String.Format("@{0,6} DRAM WRTE: Channel {1}, Rank {2}, Bank {3}, Row {4}, Col {5}",
                         cycles, cid, addr.rid, addr.bid, addr.rowid, addr.colid);*/

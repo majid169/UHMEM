@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MemMap
 {
-    public class AC
+    public class Ideal
     {
 	    static uint migration_num = 0;
         static ulong[] prev_core_stall_cycles;
@@ -79,6 +79,7 @@ namespace MemMap
   	
 
 	public static void tick() {
+        Console.WriteLine("this is the Ideal Tick()");
         RowStat.AccessInfo temp;
 
         ulong rowkey;

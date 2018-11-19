@@ -393,6 +393,8 @@ namespace MemMap
                      mesur.tick();  
                 if (Config.proc.cache_insertion_policy == "AC")
                      mesur.tick();  
+                if (Config.proc.cache_insertion_policy == "Ideal")
+                     mesur.tick();  
 
 	
 		//Jin: Row Migration Policies
@@ -400,6 +402,8 @@ namespace MemMap
        	             rmp.tick();
 
 		if (Config.proc.cache_insertion_policy == "AC")
+       	             rmp.tick();
+		if (Config.proc.cache_insertion_policy == "Ideal")
        	             rmp.tick();
  
                 //progress simulation time

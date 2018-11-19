@@ -77,6 +77,7 @@ namespace MemMap
                     break;
                 case "Ideal":
                     Ideal.decision();
+                    break;
                 default:
                     Console.WriteLine("Row Migration Policy Error");
                     break;

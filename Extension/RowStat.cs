@@ -11,10 +11,10 @@ namespace MemMap
     {
 		public  struct AccessInfo 
         {
-            public ulong ReadMiss;           //row buffer read miss 
+            public ulong ReadMiss;      //row buffer read miss 
             public ulong WriteMiss;		//row buffer write miss
             public ulong ReadHit;		//row buffer read hit
-            public ulong WriteHit;           //row buffer write hit
+            public ulong WriteHit;      //row buffer write hit
             public ulong Access;		//total access
             public double ReadMLPnum;        //MLP number for Read
             public double WriteMLPnum;       //MLP number for Write
@@ -24,6 +24,7 @@ namespace MemMap
             public double WriteMLPTimes;  
             public int pid;                  //process that the row belongs to
             public bool addlist;             //whether the page has been added to the migration list
+            public uint counter;         // counts from 0-7
         }
 
         public static ulong page_size = (ulong)Config.proc.page_size;
@@ -105,6 +106,7 @@ namespace MemMap
             AccessInfo temp;
             if(!dict.ContainsKey(KeyGen(req)))
             {//If dictionary does not have this record
+                //temp = dict[KeyGen(req)];
                 temp.ReadMiss = 0;
                 temp.WriteMiss = 0;
                 temp.ReadHit = 0;
@@ -118,6 +120,7 @@ namespace MemMap
                 temp.WriteMLPTimes = 0;
                 temp.pid = req.pid;
                 temp.addlist = false;
+                temp.counter = 0;
 
 				//not in the dictionary means a cold miss
 				if (req.type == ReqType.RD)
@@ -172,6 +175,7 @@ namespace MemMap
                 temp.WriteMLPTimes = 0;
                 temp.pid = req.pid;
                 temp.addlist = false;
+                temp.counter = 0;
 
                 //not in the dictionary means a cold miss
                 if (req.type == ReqType.RD)
