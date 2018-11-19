@@ -22,7 +22,11 @@ namespace MemMap
         static double alpha = 0.1;
         static double[] ThreadWeight; 
 
+        static ulong most_Access = 0;
+
 	public static void decision() {
+
+        /*
         prev_u_total = u_total;	
         u_total = 0;
 
@@ -75,11 +79,40 @@ namespace MemMap
             eff_thresh_inc  = !eff_thresh_inc;
         }
         migration_num = 0;
+        */
 	}
   	
 
 	public static void tick() {
-        Console.WriteLine("this is the Ideal Tick()");
+        //Console.WriteLine("this is the Ideal Tick()");
+        ulong most_accesses_key = 0;
+        ulong most_accesses = 0;
+        foreach(KeyValuePair<ulong,RowStat.AccessInfo> entry in RowStat.NVMDict){
+            if(entry.Value.Access > most_accesses){
+               most_accesses_key = entry.Key;
+               most_accesses = entry.Value.Access;
+            }
+        }
+
+        RowStat.AccessInfo temp;
+        
+        ulong rowkey = most_accesses_key;
+        if(!RowStat.NVMDict.ContainsKey(rowkey)){ return; }
+
+        temp = RowStat.NVMDict[rowkey];
+        //Console.WriteLine("tick on {0}", rowkey);
+
+        if(temp.addlist){ return; }
+
+        //Console.WriteLine("Migrating {0}", rowkey);
+
+        Migration.migrationlist.Add(rowkey);
+        Migration.migrationlistPID.Add(temp.pid);
+        migration_num++;
+        temp.addlist = true;
+        RowStat.NVMDict[rowkey] = temp;
+
+        /*
         RowStat.AccessInfo temp;
 
         ulong rowkey;
@@ -110,6 +143,7 @@ namespace MemMap
             RowStat.NVMDict[rowkey] = temp;
         }
         //END
+        */
     }
 
 	public static void initialize()
