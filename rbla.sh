@@ -17,7 +17,7 @@ mono sim.exe \
 -sched.sched_algo FRFCFS \
 -mctrl.page_randomize true \
 -sim_type INST \
--sim_inst_max 500000000 \
--warmup_inst_max 500000000 \
+-sim_inst_max 5000000 \
+-warmup_inst_max 5000000 \
 -TraceDirs ./FilteredTrace \
--traces cpu2006-mcf.gz cpu2006-soplex.gz cpu2006-milc.gz cpu2006-omnetpp.gz cpu2006-leslie3d.gz redis-ycsb-workloada.gz redis-ycsb-workloadb.gz cpu2006-astar.gz&
+-traces cpu2006-astar.gz cpu2006-astar.gz cpu2006-astar.gz cpu2006-astar.gz cpu2006-astar.gz cpu2006-astar.gz cpu2006-astar.gz cpu2006-astar.gz 
