@@ -100,6 +100,8 @@ namespace MemMap
         if(!RowStat.NVMDict.ContainsKey(rowkey)){ return; }
 
         temp = RowStat.NVMDict[rowkey];
+        temp.Access = 0;
+        RowStat.NVMDict[rowkey] = temp;
         //Console.WriteLine("tick on {0}", rowkey);
 
         if(temp.addlist){ return; }
