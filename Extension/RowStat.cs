@@ -24,6 +24,7 @@ namespace MemMap
             public double WriteMLPTimes;  
             public int pid;                  //process that the row belongs to
             public bool addlist;             //whether the page has been added to the migration list
+            public uint counter;         // counts from 0-7
         }
 
         public static ulong page_size = (ulong)Config.proc.page_size;
@@ -118,6 +119,7 @@ namespace MemMap
                 temp.WriteMLPTimes = 0;
                 temp.pid = req.pid;
                 temp.addlist = false;
+                temp.counter = 0;
 
 				//not in the dictionary means a cold miss
 				if (req.type == ReqType.RD)
@@ -172,6 +174,7 @@ namespace MemMap
                 temp.WriteMLPTimes = 0;
                 temp.pid = req.pid;
                 temp.addlist = false;
+                temp.counter = 0;
 
                 //not in the dictionary means a cold miss
                 if (req.type == ReqType.RD)

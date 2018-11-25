@@ -22,13 +22,14 @@ namespace MemMap
         static double eff_thresh = 0;
         static double alpha = 0.1;
         static double[] ThreadWeight; 
+        static Random randm = new Random();
 
 	public static void decision() {
         	prev_u_total = u_total;	
 
                 u_total = 0;
 
-                for (int i = 0; i < Config.N; i++)
+                /*for (int i = 0; i < Config.N; i++)
                 {
                     u_total += (double) (Measurement.core_stall_cycles[i] - prev_core_stall_cycles[i]);
                 }
@@ -79,7 +80,7 @@ namespace MemMap
                           eff_thresh = eff_thresh + unit;
                       }
                       eff_thresh_inc  = !eff_thresh_inc;
-                }
+                }*/
 
                 migration_num = 0;
 	}
@@ -87,6 +88,7 @@ namespace MemMap
 
 	public static void tick()
         {
+               //Console.WriteLine("AC policy tick() called\n");
                RowStat.AccessInfo temp;
                ulong rowkey;
 
@@ -99,19 +101,29 @@ namespace MemMap
 
                if (temp.addlist)
                  return;
-                     
+                    
+               uint c_value = temp.counter;
+               double c_n = Math.Pow(2, c_value);
+               double c_n1 = Math.Pow(2, c_value+1);
 
-              double utility = (temp.ReadMiss * diff_read_cost * temp.ReadMLPnum + temp.WriteMiss * diff_write_cost * temp.WriteMLPnum)  * ThreadWeight[temp.pid];
+               int rand_num = randm.Next(0, 99);
+               double prob_val = 100/(c_n1-c_n);
+
+               if(rand_num < prob_val) {
+                   temp.counter++;
+               }
+
+               c_value = temp.counter;
+              //double utility = (temp.ReadMiss * diff_read_cost * temp.ReadMLPnum + temp.WriteMiss * diff_write_cost * temp.WriteMLPnum)  * ThreadWeight[temp.pid];
 
 
-
-
-               if ((utility > eff_thresh) && (!Migration.migrationlist.Contains(rowkey)))
+               if ((c_value >= 7) && (!Migration.migrationlist.Contains(rowkey)))
                {
                     Migration.migrationlist.Add(rowkey);
                     Migration.migrationlistPID.Add(temp.pid);
                     migration_num++;
                     temp.addlist = true;
+                    temp.counter = 0;
                     RowStat.NVMDict[rowkey] = temp;
                }
                 
@@ -119,10 +131,10 @@ namespace MemMap
 
 	public static void initialize()
 	{
-                DDR3DRAM ddr3_temp1 = new DDR3DRAM (Config.mem.ddr3_type, Config.mem.clock_factor, 0, 0);   
+                /*DDR3DRAM ddr3_temp1 = new DDR3DRAM (Config.mem.ddr3_type, Config.mem.clock_factor, 0, 0);   
                 DDR3DRAM ddr3_temp2 = new DDR3DRAM (Config.mem2.ddr3_type, Config.mem2.clock_factor,0,0);   
                 diff_read_cost = ddr3_temp1.timing.tRCD - ddr3_temp2.timing.tRCD;
-                diff_write_cost = ddr3_temp1.timing.tWR - ddr3_temp2.timing.tWR;
+                diff_write_cost = ddr3_temp1.timing.tWR - ddr3_temp2.timing.tWR;*/
                 Interval = Row_Migration_Policies.Interval;
                 prev_core_stall_cycles = new ulong[Config.N];
                 prev_interference = new double[Config.N];
@@ -141,17 +153,14 @@ namespace MemMap
 
 	public static void assignE0()
 	{
-                u_total = 0;
+             /*   u_total = 0;
 
                 for (int i = 0; i < Config.N; i++)
                 {
                     u_total += (double) (Measurement.core_stall_cycles[i] - prev_core_stall_cycles[i]);
                 }
 	        
-/*                double total_mpkc = 0;
-                for (int i = 0; i < Config.N; i++)
-                    total_mpkc += (double) (Measurement.core_rpkc[i] + Measurement.core_wpkc[i] - prev_core_rpkc[i] - prev_core_wpkc[i]);
-*/                
+              
                 for (int i = 0; i < Config.N; i++)
                 {
                       if (Measurement.memtime[i] != prev_memtime[i])
@@ -177,13 +186,8 @@ namespace MemMap
                 }
                 eff_thresh = alpha * Eff_max;
 
-
-/*                Console.WriteLine ("migration number: {0}", migration_num);
-                Console.WriteLine ("DramWeightedReadResponseTime: {0}", RowStat.DramWeightedReadResponseTime);
-                Console.WriteLine ("NVMWeightedReadResponseTime: {0}", RowStat.NVMWeightedReadResponseTime);
-                Console.WriteLine ("utotal {0}", u_total);
-                Console.WriteLine ("threshold: {0}", eff_thresh);*/
-	}
+    */
+	} 
 
     }
 }
